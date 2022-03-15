@@ -14,4 +14,8 @@ public interface NodeCrudOperation {
 
 	public boolean checkNode(String parentPath);
 
+	public void update(String nodePath, String name, String desc);
+
+	public void updateNodeName(String nodePath,String newName);
+
 }

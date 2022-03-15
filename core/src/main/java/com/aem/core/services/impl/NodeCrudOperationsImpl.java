@@ -9,9 +9,7 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.nodetype.NodeType;
 
-import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.json.JSONObject;
@@ -147,40 +145,115 @@ public class NodeCrudOperationsImpl implements NodeCrudOperation {
 		return false;
 	}
 
-	public boolean updateNode(String path, String nodeName) {
+	@Override
+	public void update(String nodePath, String name, String desc) {
+
+		Log.info(name);
+		Log.info(nodePath);
+
+		JSONObject json = new JSONObject();
 
 		try {
 			ResourceResolver resolver = fres.getRsrc();
+
 			Session session = resolver.adaptTo(Session.class);
-			
-			ModifiableValueMap mvp = resolver.adaptTo(null)
-			
+
 			if (session != null) {
 
-				Node currentPath = session.getNode(path);
+				Node currentNode = session.getNode(nodePath);
 
-				if (currentPath.hasNodes()) {
+				Log.info(currentNode.toString());
 
-					NodeIterator details = currentPath.getNodes();
+				if (currentNode.hasNodes()) {
 
-					while (details.hasNext()) {
+					NodeIterator itr = currentNode.getNodes();
 
-						Node currentNode = details.nextNode();
+					while (itr.hasNext()) {
 
-							Node fetchNode = currentNode.getNode(nodeName);
-						
+						Node currentDetail = itr.nextNode();
+
+						Log.info(name);
+
+						if (currentDetail.hasProperty(desc)) {
+
+							currentDetail.setProperty("title", "Uma Mahesh");
+
+						}
 
 					}
+
 				}
 
 			}
+
+			session.save();
+			session.logout();
+		} catch (LoginException |
+
+				RepositoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public void updateNodeName(String nodePath, String newName) {
+
+		try {
+			ResourceResolver resolver = fres.getRsrc();
+			Session se = resolver.adaptTo(Session.class);
+
+			if (se != null) {
+
+				Resource currentResource = resolver.getResource(nodePath);
+
+				Node node = currentResource.adaptTo(Node.class);
+
+				node.getSession().move(node.getPath(), node.getParent().getPath() + "/" + newName);
+
+//				Log.info(node.toString());
+
+//				Node textNode = node.getNode(name);
+//
+//				Log.info(textNode.toString());
+//
+//				textNode.update(newName);
+
+//				if (node.hasNodes()) {
+//
+//					NodeIterator itr = node.getNodes();
+//
+//					while (itr.hasNext()) {
+//
+//						Node currentNode = itr.nextNode();
+//
+//						//Log.info(currentNode.toString());
+//
+//					
+//						
+//					
+//					}
+//
+//				}
+
+				//
+//				Log.info(fetchNodes.toString());
+//
+//				Node currentNode = fetchNodes.getNode(name);
+//
+//				Log.info(currentNode.toString() + "Hello world");
+
+			}
+
+			se.save();
+			se.logout();
 
 		} catch (LoginException | RepositoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		return false;
-
 	}
+
 }

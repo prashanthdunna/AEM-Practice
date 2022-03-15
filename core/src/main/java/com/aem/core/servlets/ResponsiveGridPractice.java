@@ -7,6 +7,7 @@ import javax.jcr.NodeIterator;
 import javax.jcr.Property;
 import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
+import javax.jcr.Session;
 import javax.servlet.Servlet;
 
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -34,47 +35,62 @@ public class ResponsiveGridPractice extends SlingSafeMethodsServlet {
 
 		ResourceResolver resolver = req.getResourceResolver();
 
-		Resource resource = resolver.getResource("/content/mycode/us/en/myPage/jcr:content/root/responsivegrid");
+		Resource resource = resolver.getResource("/content/mycode/us/en/myPage/jcr:content/root/responsivegrid/text_comp");
 
 		Node currentNode = resource.adaptTo(Node.class);
 
-		// Log.info(currentNode.toString());
-
-		JSONObject obj = new JSONObject();
-
-		try {
-			if (currentNode.hasNodes()) {
-
-				NodeIterator dataitems = currentNode.getNodes();
-
-				while (dataitems.hasNext()) {
-
-					Node data = dataitems.nextNode();
-
-					PropertyIterator pr = data.getProperties();
-
-					while (pr.hasNext()) {
-
-						Property pr1 = pr.nextProperty();
-
-						obj.put(pr1.getName(), pr1.getValue());
-
-					}
-
-					obj.put("=================", "===============");
-
-				}
-
-			}
+	     try {
+			currentNode.setProperty("title","Updated");
+			Session se = resolver.adaptTo(Session.class);
+			 se.save();
 		} catch (RepositoryException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+	     
+	     
+	     res.getWriter().print("created");
+	    
 
-		res.getWriter().print(obj);
+//		JSONObject obj = new JSONObject();
+//
+//		try {
+//			if (currentNode.hasNodes()) {
+//
+//				NodeIterator dataitems = currentNode.getNodes();
+//
+//				while (dataitems.hasNext()) {
+//
+//					Node data = dataitems.nextNode();
+//
+//					PropertyIterator pr = data.getProperties();
+//
+//					while (pr.hasNext()) {
+//
+//						Property pr1 = pr.nextProperty();
+//                         
+//						if(pr1.getName().equals("title")) {
+//						//obj.put(pr1.getName(), pr1.getValue());
+//							pr1.getName().repl
+//							
+//						}
+//
+//					}
+//
+//					obj.put("=================", "===============");
+//
+//				}
+//
+//			}
+//		} catch (RepositoryException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (JSONException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+
+	//	res.getWriter().print(obj);
 
 	}
 
