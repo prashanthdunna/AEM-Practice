@@ -16,6 +16,6 @@ public interface NodeCrudOperation {
 
 	public void update(String nodePath, String name, String desc);
 
-	public void updateNodeName(String nodePath,String newName);
+	public void updateNodeName(String nodePath, String newName);
 
 }
