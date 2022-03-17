@@ -10,6 +10,8 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import com.aem.core.util.PracticeConstants;
+
 @Component(service = FetchResponseService.class)
 
 public class FetchResponseService {
@@ -22,7 +24,7 @@ public class FetchResponseService {
 
 		final Map<String, Object> paramMap = new HashMap<String, Object>();
 
-		paramMap.put(ResourceResolverFactory.SUBSERVICE, SUB_SERVICE_USER);
+		paramMap.put(ResourceResolverFactory.SUBSERVICE, PracticeConstants.SUB_SERVICE_USER);
 
 		ResourceResolver resourceresolver = factory.getServiceResourceResolver(paramMap);
 
