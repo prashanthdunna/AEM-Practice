@@ -1,9 +1,15 @@
 package com.aem.core.services.impl;
 
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Iterator;
+import java.util.List;
 
+import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -19,86 +25,70 @@ import com.aem.core.services.ContentFragmentBasicCrud;
 import com.aem.core.services.FetchResponseService;
 import com.aem.core.util.PracticeConstants;
 
+import sun.util.logging.resources.logging;
+
 @Component(service = ContentFragmentBasicCrud.class)
 public class ContentFragmentBasicCrudImpl implements ContentFragmentBasicCrud {
 
 	private static final Logger Log = LoggerFactory.getLogger(ContentFragmentBasicCrud.class);
 
-	JSONObject resp = new JSONObject();
-	JSONObject element = new JSONObject();
-	JSONObject variation = new JSONObject();
 	@Reference
 	private FetchResponseService frs;
 
 	@Override
-	public JSONObject getContentFragmentData(String contentFragmenName) {
+	public JSONObject getContentFragment(String contentFragment) {
 
-		ResourceResolver resolver;
+		JSONObject response = new JSONObject();
+		JSONObject element = new JSONObject();
+		JSONArray elements = new JSONArray();
+		JSONObject variations = new JSONObject();
 		try {
-			resolver = frs.getRsrc();
-
+			ResourceResolver resolver = frs.getRsrc();
 			Resource resource = resolver
-					.getResource(PracticeConstants.FRAGMENT_PARENT_RESOURCE + "/" + contentFragmenName);
-
+					.getResource(PracticeConstants.FRAGMENT_PARENT_RESOURCE + "/" + contentFragment);
 			if (resource != null) {
-
 				ContentFragment fragment = resource.adaptTo(ContentFragment.class);
-
-				resp.put(PracticeConstants.CONTENT_FRAGMENT_NAME, fragment.getName());
-				resp.put(PracticeConstants.CONTENT_FRAGMENT_TITLE, fragment.getTitle());
-				resp.put(PracticeConstants.CONTENT_FRAGMENT_DESC, fragment.getDescription());
-
-				Iterator<ContentElement> ce = fragment.getElements();
-
-				while (ce.hasNext()) {
-
-					ContentElement contentElement = ce.next();
-					Log.info(contentElement.toString());
-
-					element.put(PracticeConstants.CONTENT_FRAGMENT_TITLE, contentElement.getTitle());
-
-					element.put(PracticeConstants.CONTENT_FRAGMENT_TYPE, contentElement.getContentType());
-
-					FragmentData fragvalue = contentElement.getValue();
-					element.put(PracticeConstants.CONTENT_FRAGMENT_VALUE, fragvalue.getValue().toString());
-
-					DataType fragdata = fragvalue.getDataType();
-					element.put(PracticeConstants.CONTENT_FRAGMENT_DATATYPE, fragdata.getTypeString());
-
-					element.put(contentElement.getName(), fragvalue.getValue());
-
-//
-//					Iterator<ContentVariation> contentVariations = contentElement.getVariations();
-//
-//					while (contentVariations.hasNext()) {
-//
-//						ContentVariation varDetails = contentVariations.next();
-//
-//						Log.info(varDetails.toString());
-//
-//						variation.put(PracticeConstants.CONTENT_FRAGMENT_TITLE, varDetails.getTitle());
-//
-//						variation.put(PracticeConstants.CONTENT_FRAGMENT_DESC, varDetails.getDescription());
-//
-//						variation.put(PracticeConstants.CONTENT_FRAGMENT_TYPE, varDetails.getContentType());
-//
-//						FragmentData variationData = varDetails.getValue();
-//						variation.put(PracticeConstants.CONTENT_FRAGMENT_VALUE, varDetails.getValue().toString());
-//
-//						DataType data = variationData.getDataType();
-//						variation.put(PracticeConstants.CONTENT_FRAGMENT_DATATYPE, variationData.getDataType());
-//
-//					}
-//
+				Iterator<ContentElement> contentElement = fragment.getElements();
+				JSONObject myjson = new JSONObject();
+				while (contentElement.hasNext()) {
+					JSONArray ele = new JSONArray();
+					ContentElement content = contentElement.next();
+//					FragmentData fragdata = content.getValue();
+					/*if (fragdata.getDataType().isMultiValue()) {
+						myjson.put(content.getName(), fetchMultifield(fragdata));
+						elements.put(myjson);
+					} else {
+						myjson.put(content.getName(), fragdata.getValue());
+						elements.put(myjson);
+					}*/
+					Iterator<ContentVariation> contentVariation = content.getVariations();
+					while (contentVariation.hasNext()) {
+						ContentVariation varContent = contentVariation.next();
+						FragmentData varFragment = varContent.getValue();
+						JSONObject variation = new JSONObject();
+						if (varFragment.getDataType().isMultiValue()) {
+							variation.put(varContent.getName(), fetchMultifield(varFragment));
+						} else {
+							variation.put(varContent.getTitle(), varFragment.getValue());
+						}
+						ele.put(variation);
+					}
+					variations.put(content.getTitle(), ele);
 				}
-
+				response.put(PracticeConstants.CONTENT_FRAGMENT_VARIATIONS, variations);
 			}
-
-		} catch (Exception e) {
+		} catch (LoginException | JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-
 		}
-		return element;
+		return response;
 	}
+
+	private List<String> fetchMultifield(FragmentData fragdata) {
+
+		String[] fragValue = (String[]) fragdata.getValue();
+		return Arrays.asList(fragValue != null ? fragValue : new String[0]);
+
+	}
+
 }

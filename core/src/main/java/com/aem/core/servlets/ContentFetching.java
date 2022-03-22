@@ -19,10 +19,10 @@ import com.aem.core.services.ContentFragmentBasicCrud;
 
 @Component(service = Servlet.class, property = {
 
-		"sling.servlet.methods = " + HttpConstants.METHOD_POST, "sling.servlet.paths = " + "/test/fetchFrag"
+		"sling.servlet.methods = " + HttpConstants.METHOD_GET, "sling.servlet.paths =" + "/bin/contentFetching"
 
 })
-public class FetchingContentFragmentDetails extends SlingAllMethodsServlet {
+public class ContentFetching extends SlingAllMethodsServlet {
 
 	@Reference
 	private ContentFragmentBasicCrud cfbc;
@@ -35,11 +35,9 @@ public class FetchingContentFragmentDetails extends SlingAllMethodsServlet {
 
 		try {
 			JSONObject json = new JSONObject(body);
-
-			JSONObject object = cfbc.getContentFragment(json.getString("path"));
-
-			// Print the content
-			res.getWriter().print(object);
+			JSONObject data = cfbc.getContentFragment(json.getString("path"));
+			
+			res.getWriter().print(data);
 
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
